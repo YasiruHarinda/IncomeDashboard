@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:income_tracker/data/data.dart';
 
 class MainScreen extends StatelessWidget {
   const MainScreen({super.key});
@@ -30,7 +31,7 @@ class MainScreen extends StatelessWidget {
                     ),
                     child: Icon(
                       CupertinoIcons.person_fill,
-                      color: Colors.yellow[800],
+                      color: const Color.fromARGB(255, 2, 0, 7),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -134,12 +135,31 @@ class MainScreen extends StatelessWidget {
             ],
           ),
 
+const SizedBox(height: 20),
+
+// ================= TRANSACTIONS LIST =================
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Transactions',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              Text(
+                'View All',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.outline,
+                ),
+              ),
+            ],
+          ),
+
           const SizedBox(height: 20),
 
           // ================= TRANSACTIONS LIST =================
           Expanded(
             child: ListView.builder(
-              itemCount: 3,
+              itemCount: myTransactionsData.length,
               itemBuilder: (context, i) {
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 16),
@@ -155,22 +175,29 @@ class MainScreen extends StatelessWidget {
                         Row(
                           children: [
                             Container(
-                              width: 40,
-                              height: 40,
-                              decoration: const BoxDecoration(
+                              width: 30,
+                              height: 30,
+                              decoration: BoxDecoration(
+                                color:myTransactionsData[i]['color'],
                                 shape: BoxShape.circle,
-                                color: Color.fromARGB(255, 96, 72, 231),
                               ),
+                              child: myTransactionsData[i]['icon'],
                             ),
-                            const SizedBox(width: 12),
-                            const Text('Saving'),
                           ],
                         ),
+                        const SizedBox(width: 12),
+                        Text(
+                          myTransactionsData[i]['name'],
+                          style: const TextStyle(
+                            color: Color.fromARGB(255, 0, 0, 0),
+                          ),
+                        ),
+                                
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
-                          children: const [
-                            Text('Rs 45.00'),
-                            Text('Today'),
+                          children: [
+                            Text(myTransactionsData[i]['totalAmount']),
+                            Text(myTransactionsData[i]['date']),
                           ],
                         ),
                       ],
@@ -184,8 +211,7 @@ class MainScreen extends StatelessWidget {
       ),
     );
   }
-}
-
+} 
 // ================= MINI STAT WIDGET =================
 Widget _miniStat(String title, String value) {
   return Column(
@@ -198,7 +224,7 @@ Widget _miniStat(String title, String value) {
         value,
         style: const TextStyle(
           color: Colors.white,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.normal,
         ),
       ),
     ],
