@@ -8,7 +8,7 @@ class MainScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 25.0, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
       child: Column(
         children: [
 
@@ -29,21 +29,18 @@ class MainScreen extends StatelessWidget {
                         ],
                       ),
                     ),
-                    child: Icon(
+                    child: const Icon(
                       CupertinoIcons.person_fill,
-                      color: const Color.fromARGB(255, 2, 0, 7),
+                      color: Colors.black,
                     ),
                   ),
                   const SizedBox(width: 10),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+                    children: const [
                       Text(
                         "Welcome!",
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Theme.of(context).colorScheme.outline,
-                        ),
+                        style: TextStyle(fontSize: 12, color: Colors.grey),
                       ),
                       Text(
                         "Yasiru Harinda",
@@ -95,20 +92,15 @@ class MainScreen extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-
                 const SizedBox(height: 20),
-
-                // ================= ASSETS ROW =================
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-
-                      _miniStat('Cash', 'Rs 2500'),
-                      _miniStat('Investments', 'Rs 25M'),
-                      _miniStat('Liabilities', 'Rs 800'),
-
+                    children: const [
+                      MiniStat(title: 'Cash', value: 'Rs 2500'),
+                      MiniStat(title: 'Investments', value: 'Rs 25M'),
+                      MiniStat(title: 'Liabilities', value: 'Rs 800'),
                     ],
                   ),
                 ),
@@ -135,69 +127,79 @@ class MainScreen extends StatelessWidget {
             ],
           ),
 
-const SizedBox(height: 20),
-
-// ================= TRANSACTIONS LIST =================
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Transactions',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-              Text(
-                'View All',
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.outline,
-                ),
-              ),
-            ],
-          ),
-
           const SizedBox(height: 20),
 
           // ================= TRANSACTIONS LIST =================
+// ================= TRANSACTIONS LIST =================
           Expanded(
             child: ListView.builder(
               itemCount: myTransactionsData.length,
               itemBuilder: (context, i) {
+                final tx = myTransactionsData[i];
+
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 16),
                   child: Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(14),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
+
+                        // LEFT SIDE
                         Row(
                           children: [
                             Container(
-                              width: 30,
-                              height: 30,
+                              width: 36,
+                              height: 36,
                               decoration: BoxDecoration(
-                                color:myTransactionsData[i]['color'],
+                                color: tx['iconBg'],
                                 shape: BoxShape.circle,
                               ),
-                              child: myTransactionsData[i]['icon'],
+                              child: Icon(
+                                tx['icon'],
+                                color: tx['iconColor'],
+                                size: 20,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              tx['name'],
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ],
                         ),
-                        const SizedBox(width: 12),
-                        Text(
-                          myTransactionsData[i]['name'],
-                          style: const TextStyle(
-                            color: Color.fromARGB(255, 0, 0, 0),
-                          ),
-                        ),
-                                
+
+                        // RIGHT SIDE
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            Text(myTransactionsData[i]['totalAmount']),
-                            Text(myTransactionsData[i]['date']),
+                            Text(
+                              tx['totalAmount'],
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              tx['date'],
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
+                            ),
                           ],
                         ),
                       ],
@@ -211,22 +213,39 @@ const SizedBox(height: 20),
       ),
     );
   }
-} 
-// ================= MINI STAT WIDGET =================
-Widget _miniStat(String title, String value) {
-  return Column(
-    children: [
-      Text(
-        title,
-        style: const TextStyle(color: Colors.white, fontSize: 12),
-      ),
-      Text(
-        value,
-        style: const TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.normal,
+}
+
+//////////////////////////////////////////////////////////////
+// ================= MINI STAT WIDGET =======================
+//////////////////////////////////////////////////////////////
+
+class MiniStat extends StatelessWidget {
+  final String title;
+  final String value;
+
+  const MiniStat({
+    super.key,
+    required this.title,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(
+          title,
+          style: const TextStyle(color: Colors.white, fontSize: 12),
         ),
-      ),
-    ],
-  );
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.normal,
+          ),
+        ),
+      ],
+    );
+  }
 }
