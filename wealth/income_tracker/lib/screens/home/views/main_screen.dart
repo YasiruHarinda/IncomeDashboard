@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:income_tracker/data/data.dart';
 
+
 class MainScreen extends StatelessWidget {
   const MainScreen({super.key});
 
@@ -189,7 +190,7 @@ class MainScreen extends StatelessWidget {
                             Text(
                               tx['totalAmount'],
                               style: const TextStyle(
-                                fontWeight: FontWeight.bold,
+                                fontWeight: FontWeight.normal,
                               ),
                             ),
                             const SizedBox(height: 4),
