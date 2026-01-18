@@ -1,11 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:intl/intl.dart';
 
-class AddAssert extends StatelessWidget {
-  TextEditingController assertController= TextEditingController();
-  TextEditingController categoryontroller= TextEditingController();
-  TextEditingController dateController= TextEditingController();
-  AddAssert({super.key});
+class AddAssert extends StatefulWidget {
+  const AddAssert({super.key});
+
+  @override
+  State<AddAssert> createState() => _AddAssertState();
+}
+
+class _AddAssertState extends State<AddAssert> {
+  TextEditingController assertController = TextEditingController();
+  TextEditingController categoryontroller = TextEditingController();
+  TextEditingController dateController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    dateController.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +29,7 @@ class AddAssert extends StatelessWidget {
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.surface,
         ),
-        body:Padding(
+        body: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -78,16 +91,23 @@ class AddAssert extends StatelessWidget {
 
               const SizedBox(height: 16.0),
               TextFormField(
-                controller: datecontroller,
+                controller: dateController,
                 readOnly: true,
-                onTap: () {
-                  showDatePicker(
+                onTap: () async{
+                  DateTime? newDate = await showDatePicker(
                     context: context,
                     
                     firstDate: DateTime.now(),
                     lastDate: DateTime.now().add(Duration(days: 365)),
                     initialDate: DateTime.now(),
                   );
+                  if(newDate!=null){
+                    setState((){
+                       dateController.text = DateFormat('yyyy-MM-dd').format(newDate);
+
+                    });
+                   
+                  }
                 },
                 decoration: const InputDecoration(
                   filled: true,
