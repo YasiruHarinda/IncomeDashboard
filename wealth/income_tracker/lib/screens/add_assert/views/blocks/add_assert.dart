@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class AddAssert extends StatefulWidget {
   const AddAssert({super.key});
@@ -13,6 +14,7 @@ class _AddAssertState extends State<AddAssert> {
   TextEditingController assertController = TextEditingController();
   TextEditingController categoryontroller = TextEditingController();
   TextEditingController dateController = TextEditingController();
+  DateTime selectDate = DateTime.now();
 
   @override
   void initState() {
@@ -76,10 +78,30 @@ class _AddAssertState extends State<AddAssert> {
               const SizedBox(height: 32.0),
               TextFormField(
                 controller:categoryontroller,
-                decoration: const InputDecoration(
+                readOnly: true,
+                onTap: (){
+
+                },
+                decoration: InputDecoration(
                   filled: true,
                   fillColor: Colors.white,
-                  border: OutlineInputBorder(
+                  prefixIcon: const Icon(
+                    Icons.list,
+                    size:16,
+                    color: Colors.grey,
+                  ),
+                  suffixIcon: IconButton(
+                    onPressed: (){
+                      showDialog(context: context, builder: builder)
+
+                    },
+                    icon: Icon(
+                      FontAwesomeIcons.plus,
+                      size: 16,
+                      color: Colors.grey,
+                    ),
+                  ),
+                  border: const OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(12)),
                   ),
                   labelText: 'Category',
@@ -99,11 +121,12 @@ class _AddAssertState extends State<AddAssert> {
                     
                     firstDate: DateTime.now(),
                     lastDate: DateTime.now().add(Duration(days: 365)),
-                    initialDate: DateTime.now(),
+                    initialDate: selectDate,
                   );
                   if(newDate!=null){
                     setState((){
                        dateController.text = DateFormat('yyyy-MM-dd').format(newDate);
+                       selectDate = newDate;
 
                     });
                    
