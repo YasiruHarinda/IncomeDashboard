@@ -11,7 +11,7 @@ class MyAppView extends StatelessWidget {
       title: 'Income Tracker',
       theme: ThemeData(
         colorScheme: ColorScheme.light(
-          surface: const Color.fromARGB(255, 216, 215, 215), 
+          surface: const Color.fromARGB(255, 242, 242, 242), 
           onSurface: Colors.black,
           primary: const Color(0xFF00B2E7), 
           secondary: const Color(0xFFE064F7), 
