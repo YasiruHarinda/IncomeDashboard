@@ -92,7 +92,32 @@ class _AddAssertState extends State<AddAssert> {
                   ),
                   suffixIcon: IconButton(
                     onPressed: (){
-                      showDialog(context: context, builder: builder)
+                      showDialog(context: context,
+                       builder: (ctx){
+                        return AlertDialog(
+                          title: const Text('Add Category'),
+                          content: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children:[
+                              TextFormField(
+                                 // controller: dateController,
+                                  readOnly: true,
+                                 
+                                  decoration: const InputDecoration(
+                                    filled: true,
+                                    fillColor: Colors.white,
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.all(Radius.circular(12)),
+                                    ),
+                                    labelText: 'Name',
+                                  ),
+                                ),
+
+                            ]
+                           
+                          ),
+                        );
+                       });
 
                     },
                     icon: Icon(
