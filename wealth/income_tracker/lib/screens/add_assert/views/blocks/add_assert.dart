@@ -15,6 +15,14 @@ class _AddAssertState extends State<AddAssert> {
   TextEditingController categoryontroller = TextEditingController();
   TextEditingController dateController = TextEditingController();
   DateTime selectDate = DateTime.now();
+  List <String>myCategories = [
+    'CSE',
+    'FD',
+    'Saving',
+    'Unit',
+    'crypto',
+    'Treasury Bill'
+  ];
 
   @override
   void initState() {
@@ -91,41 +99,59 @@ class _AddAssertState extends State<AddAssert> {
                     color: Colors.grey,
                   ),
                   suffixIcon: IconButton(
-                    onPressed: (){
-                      showDialog(context: context,
-                       builder: (ctx){
-                        return AlertDialog(
-                          title: const Text('Add Category'),
-                          content: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children:[
-                              TextFormField(
-                                 // controller: dateController,
-                                  readOnly: true,
-                                 
-                                  decoration: const InputDecoration(
-                                    filled: true,
-                                    fillColor: Colors.white,
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.all(Radius.circular(12)),
-                                    ),
-                                    labelText: 'Name',
-                                  ),
-                                ),
+  onPressed: () {
+    final TextEditingController newCategoryController =
+        TextEditingController();
 
-                            ]
-                           
-                          ),
-                        );
-                       });
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          title: const Text('Add Category'),
+          content: TextFormField(
+            controller: newCategoryController,
+            textAlignVertical: TextAlignVertical.center,
+            decoration: const InputDecoration(
+              isDense: true,
+              filled: true,
+              fillColor: Colors.white,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(12)),
+              ),
+              labelText: 'Name',
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final String name = newCategoryController.text.trim();
+                if (name.isEmpty) return;
 
-                    },
-                    icon: Icon(
-                      FontAwesomeIcons.plus,
-                      size: 16,
-                      color: Colors.grey,
-                    ),
-                  ),
+                setState(() {
+                  myCategories.add(name);           // add to list
+                  categoryontroller.text = name;    // set Category field text
+                });
+
+                Navigator.pop(ctx);
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
+  },
+  icon: const Icon(
+    FontAwesomeIcons.plus,
+    size: 16,
+    color: Colors.grey,
+  ),
+),
+
                   border: const OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(12)),
                   ),
