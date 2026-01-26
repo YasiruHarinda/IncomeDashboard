@@ -17,18 +17,22 @@ class _HomeScreenState extends State<HomeScreen> {
   final Color selectedItem = const Color(0xFF00B2E7);
   final Color unselectedItem = Colors.black;
 
+  static const List<Widget> _pages = <Widget>[
+    MainScreen(),
+    StatScreen(),
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      body: _pages[index],
+
       bottomNavigationBar: ClipRRect(
         borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
         child: BottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
           currentIndex: index,
-          onTap: (value) {
-            setState(() {
-              index = value;
-            });
-          },
+          onTap: (value) => setState(() => index = value),
           showSelectedLabels: false,
           showUnselectedLabels: false,
           elevation: 3,
@@ -50,18 +54,20 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
+
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        highlightElevation: 0,
         onPressed: () {
-          // TODO: Uncomment and fix import when AddAssert is implemented
-          // Navigator.push(
-          //   context,
-          //   MaterialPageRoute<void>(
-          //     builder:(BuildContext context) =>const AddAssert(),
-          //   )
-          // );
+          Navigator.push(
+            context,
+            MaterialPageRoute<void>(
+              builder: (_) => const AddAssert(),
+            ),
+          );
         },
-        shape: const CircleBorder(),
         child: Container(
           width: 60,
           height: 60,
@@ -76,10 +82,12 @@ class _HomeScreenState extends State<HomeScreen> {
               end: Alignment.bottomRight,
             ),
           ),
-          child: const Icon(CupertinoIcons.add),
+          child: const Icon(
+            CupertinoIcons.add,
+            color: Colors.white,
+          ),
         ),
       ),
-      body: index == 0 ? const MainScreen() : const StatScreen(),
     );
   }
 }
