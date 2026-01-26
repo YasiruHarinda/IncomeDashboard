@@ -19,17 +19,17 @@ Bloc for state management, Firebase Core for backend wiring, and `fl_chart` for 
     </td>
     <td align="center">
       <img src="https://github.com/user-attachments/assets/1a5616d5-6680-4f8d-94e8-586efeda5a1a" width="240" />
-      <br /><sub><b>Add Income</b></sub>
+      <br /><sub><b>Add assert</b></sub>
     </td>
   </tr>
   <tr>
     <td align="center">
       <img src="https://github.com/user-attachments/assets/9fb5313b-1eb0-4ca6-98ce-1d1b2ddb4c5d" width="240" />
-      <br /><sub><b>Add Assets</b></sub>
+      <br /><sub><b>Add category</b></sub>
     </td>
     <td align="center">
       <img src="https://github.com/user-attachments/assets/bafd8151-e4db-472c-b6cc-0829fabae9bd" width="240" />
-      <br /><sub><b>Add Liabilities</b></sub>
+      <br /><sub><b>charts</b></sub>
     </td>
   </tr>
 </table>
