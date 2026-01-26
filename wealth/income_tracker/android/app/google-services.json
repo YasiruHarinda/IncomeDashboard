@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "365865939117",
+    "project_id": "income-tracker-c4e19",
+    "storage_bucket": "income-tracker-c4e19.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:365865939117:android:82c336de185d1e59ea5624",
+        "android_client_info": {
+          "package_name": "com.yasiru.incomedashboard"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBYoaXjH-x0P4JINNcIrO8-Ao58j41CNFw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
