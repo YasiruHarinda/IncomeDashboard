@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:income_tracker/screens/add_assert/views/blocks/add_assert.dart';
+import 'package:income_tracker/screens/add_assert/views/add_assert.dart';
 import 'package:income_tracker/screens/home/views/main_screen.dart';
 import 'package:income_tracker/screens/stats/stats.dart';
 
@@ -53,12 +53,13 @@ class _HomeScreenState extends State<HomeScreen> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute<void>(
-              builder:(BuildContext context) =>const AddAssert(),
-            )
-          );
+          // TODO: Uncomment and fix import when AddAssert is implemented
+          // Navigator.push(
+          //   context,
+          //   MaterialPageRoute<void>(
+          //     builder:(BuildContext context) =>const AddAssert(),
+          //   )
+          // );
         },
         shape: const CircleBorder(),
         child: Container(
