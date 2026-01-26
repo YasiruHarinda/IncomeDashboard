@@ -1,8 +1,16 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:uuid/uuid.dart';
+
+// Simple Category class for dialog usage
+class Category {
+  String categoryID;
+  String name;
+
+  Category({required this.categoryID, required this.name});
+}
 
 class AddAssert extends StatefulWidget {
   const AddAssert({super.key});
@@ -13,7 +21,7 @@ class AddAssert extends StatefulWidget {
 
 class _AddAssertState extends State<AddAssert> {
   TextEditingController assertController = TextEditingController();
-  TextEditingController categoryontroller = TextEditingController();
+  TextEditingController categoryController = TextEditingController();
   TextEditingController dateController = TextEditingController();
   DateTime selectDate = DateTime.now();
   List <String>myCategories = [
@@ -86,7 +94,7 @@ class _AddAssertState extends State<AddAssert> {
 
               const SizedBox(height: 32.0),
               TextFormField(
-                controller:categoryontroller,
+                controller:categoryController,
                 readOnly: true,
                 onTap: (){
 
@@ -101,16 +109,15 @@ class _AddAssertState extends State<AddAssert> {
                   ),
                   suffixIcon: IconButton(
   onPressed: () {
-    final TextEditingController newCategoryController =
-        TextEditingController();
-
     showDialog(
       context: context,
       builder: (ctx) {
+        TextEditingController categoryNameController = TextEditingController();
+
         return AlertDialog(
           title: const Text('Add Category'),
           content: TextFormField(
-            controller: newCategoryController,
+            controller: categoryNameController,
             textAlignVertical: TextAlignVertical.center,
             decoration: const InputDecoration(
               isDense: true,
@@ -129,12 +136,14 @@ class _AddAssertState extends State<AddAssert> {
             ),
             ElevatedButton(
               onPressed: () {
-                final String name = newCategoryController.text.trim();
-                if (name.isEmpty) return;
+                final category = Category(
+                  categoryID: const Uuid().v1(),
+                  name: categoryNameController.text.trim(),
+                );
 
                 setState(() {
-                  myCategories.add(name);           // add to list
-                  categoryontroller.text = name;    // set Category field text
+                  myCategories.add(category.name);           // add to list
+                  categoryController.text = category.name;    // set Category field text
                 });
 
                 Navigator.pop(ctx);
