@@ -43,7 +43,7 @@ Widget build(BuildContext context) {
     };
 
     return SideTitleWidget(
-      meta: meta,
+      axisSide: meta.axisSide,
       child: Text(text, style: style),
     );
   }
