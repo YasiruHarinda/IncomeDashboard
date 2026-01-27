@@ -1,5 +1,8 @@
+import 'package:assert_repository/assert_repository.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:income_tracker/screens/add_assert/blocs/create_categorybloc/create_category_bloc.dart';
 import 'package:income_tracker/screens/add_assert/views/add_assert.dart';
 import 'package:income_tracker/screens/home/views/main_screen.dart';
 import 'package:income_tracker/screens/stats/stats.dart';
@@ -17,10 +20,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final Color selectedItem = const Color(0xFF00B2E7);
   final Color unselectedItem = Colors.black;
 
-  static const List<Widget> _pages = <Widget>[
-    MainScreen(),
-    StatScreen(),
-  ];
+  static const List<Widget> _pages = <Widget>[MainScreen(), StatScreen()];
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +64,12 @@ class _HomeScreenState extends State<HomeScreen> {
           Navigator.push(
             context,
             MaterialPageRoute<void>(
-              builder: (_) => const AddAssert(),
+              builder: (BuildContext context) => BlocProvider(
+                create: (context) => CreateCategoryBloc(
+                  FirebaseAssertRepo()
+                ),
+                child: const AddAssert(),
+              ),
             ),
           );
         },
@@ -74,18 +79,12 @@ class _HomeScreenState extends State<HomeScreen> {
           decoration: const BoxDecoration(
             shape: BoxShape.circle,
             gradient: LinearGradient(
-              colors: [
-                Color(0xFF00B2E7),
-                Color.fromARGB(255, 101, 10, 117),
-              ],
+              colors: [Color(0xFF00B2E7), Color.fromARGB(255, 101, 10, 117)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
           ),
-          child: const Icon(
-            CupertinoIcons.add,
-            color: Colors.white,
-          ),
+          child: const Icon(CupertinoIcons.add, color: Colors.white),
         ),
       ),
     );
