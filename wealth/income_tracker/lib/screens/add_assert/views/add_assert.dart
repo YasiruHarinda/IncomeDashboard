@@ -1,4 +1,3 @@
-import 'package:assert_repository/assert_repository.dart' as assert_repo;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -13,22 +12,19 @@ class AddAssert extends StatefulWidget {
 }
 
 class _AddAssertState extends State<AddAssert> {
-  final assert_repo.AssertRepository _assertRepository =
-      assert_repo.FirebaseAssertRepo();
   final TextEditingController assertController = TextEditingController();
   final TextEditingController categoryController = TextEditingController();
   final TextEditingController dateController = TextEditingController();
 
   DateTime selectDate = DateTime.now();
   bool _isSaving = false;
-  List<String> myCategories = [
-    'CSE',
-    'FD',
-    'Saving',
-    'Unit',
-    'crypto',
-    'Treasury Bill',
-  ];
+
+  // ✅ simple list of category names
+  List<String> myCategories = [];
+
+  // ✅ change these in ONE place if you want different collection names
+  final _categoriesCol = FirebaseFirestore.instance.collection('assert_categories');
+  final _assertsCol = FirebaseFirestore.instance.collection('asserts');
 
   @override
   void initState() {
@@ -47,30 +43,36 @@ class _AddAssertState extends State<AddAssert> {
 
   Future<void> _loadCategories() async {
     try {
-      final categories = await _assertRepository.getCategory();
-      if (!mounted || categories.isEmpty) {
-        return;
-      }
+      final snap = await _categoriesCol.orderBy('createdAt', descending: true).get();
+
+      final names = snap.docs
+          .map((d) => (d.data()['name'] ?? '').toString().trim())
+          .where((name) => name.isNotEmpty)
+          .toList();
+
+      if (!mounted) return;
 
       setState(() {
-        myCategories = [
-          ...myCategories,
-          ...categories.map((category) => category.name),
-        ].toSet().toList();
+        // remove duplicates while keeping order
+        myCategories = names.toSet().toList();
       });
-    } catch (_) {
-      // Keep default categories when backend fetch fails.
+    } catch (e) {
+      // If fetch fails, keep list empty (or you can add defaults)
+      // ignore
     }
   }
 
   Future<void> _selectCategory() async {
     if (myCategories.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No categories yet. Add one using +')),
+      );
       return;
     }
 
-    final selectedCategory = await showModalBottomSheet<String>(
+    final selected = await showModalBottomSheet<String>(
       context: context,
-      builder: (context) {
+      builder: (_) {
         return SafeArea(
           child: ListView.separated(
             shrinkWrap: true,
@@ -88,13 +90,88 @@ class _AddAssertState extends State<AddAssert> {
       },
     );
 
-    if (!mounted || selectedCategory == null) {
-      return;
-    }
+    if (!mounted || selected == null) return;
 
     setState(() {
-      categoryController.text = selectedCategory;
+      categoryController.text = selected;
     });
+  }
+
+  Future<void> _addCategoryDialog() async {
+    final ctrl = TextEditingController();
+
+    await showDialog(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          title: const Text('Add Category'),
+          content: TextField(
+            controller: ctrl,
+            decoration: const InputDecoration(
+              hintText: 'Category name',
+              border: OutlineInputBorder(),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final name = ctrl.text.trim();
+                if (name.isEmpty) return;
+
+                try {
+                  // ✅ prevent duplicates (case-insensitive)
+                  final existing = await _categoriesCol
+                      .where('nameLower', isEqualTo: name.toLowerCase())
+                      .limit(1)
+                      .get();
+
+                  if (existing.docs.isNotEmpty) {
+                    if (!mounted) return;
+                    setState(() {
+                      categoryController.text = name;
+                      if (!myCategories.contains(name)) myCategories.insert(0, name);
+                    });
+                    Navigator.pop(ctx);
+                    return;
+                  }
+
+                  final id = const Uuid().v1();
+                  await _categoriesCol.doc(id).set({
+                    'categoryId': id,
+                    'name': name,
+                    'nameLower': name.toLowerCase(),
+                    'createdAt': FieldValue.serverTimestamp(),
+                  });
+
+                  if (!mounted) return;
+
+                  // ✅ update UI immediately (and also set selected)
+                  setState(() {
+                    myCategories.insert(0, name);
+                    categoryController.text = name;
+                  });
+
+                  Navigator.pop(ctx);
+
+                  // ✅ optional: re-fetch to be 100% consistent with Firebase ordering
+                  // await _loadCategories();
+                } catch (e) {
+                  if (!mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Failed to add category: $e')),
+                  );
+                }
+              },
+              child: const Text('Save'),
+            )
+          ],
+        );
+      },
+    );
   }
 
   Future<void> _saveAsset() async {
@@ -112,7 +189,8 @@ class _AddAssertState extends State<AddAssert> {
 
     try {
       final assertId = const Uuid().v1();
-      await FirebaseFirestore.instance.collection('asserts').doc(assertId).set({
+
+      await _assertsCol.doc(assertId).set({
         'assertId': assertId,
         'name': assetName,
         'category': category,
@@ -120,25 +198,19 @@ class _AddAssertState extends State<AddAssert> {
         'createdAt': FieldValue.serverTimestamp(),
       });
 
-      if (!mounted) {
-        return;
-      }
+      if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Asset added successfully.')),
       );
       Navigator.pop(context);
-    } catch (error) {
-      if (!mounted) {
-        return;
-      }
+    } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to add asset: $error')),
+        SnackBar(content: Text('Failed to add asset: $e')),
       );
     } finally {
-      if (mounted) {
-        setState(() => _isSaving = false);
-      }
+      if (mounted) setState(() => _isSaving = false);
     }
   }
 
@@ -156,31 +228,31 @@ class _AddAssertState extends State<AddAssert> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const Center(
-                child: Text(
-                  'Add Asset Screen',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
+              const Text(
+                'Add Asset',
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w500),
               ),
               const SizedBox(height: 16),
+
               SizedBox(
                 width: MediaQuery.of(context).size.width * 0.8,
                 child: TextFormField(
                   controller: assertController,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     filled: true,
                     fillColor: Colors.white,
+                    prefixIcon: const Icon(FontAwesomeIcons.box, size: 16, color: Colors.grey),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(30)),
+                      borderRadius: BorderRadius.circular(30),
+                      borderSide: BorderSide.none,
                     ),
-                    labelText: 'Asset Name',
+                    hintText: 'Asset Name',
                   ),
                 ),
               ),
-              const SizedBox(height: 32.0),
+
+              const SizedBox(height: 24),
+
               TextFormField(
                 controller: categoryController,
                 readOnly: true,
@@ -188,99 +260,21 @@ class _AddAssertState extends State<AddAssert> {
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: Colors.white,
-                  prefixIcon: const Icon(
-                    Icons.list,
-                    size: 16,
-                    color: Colors.grey,
-                  ),
+                  prefixIcon: const Icon(FontAwesomeIcons.list, size: 16, color: Colors.grey),
                   suffixIcon: IconButton(
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (ctx) {
-                          final categoryNameController = TextEditingController();
-
-                          return AlertDialog(
-                            title: const Text('Add Category'),
-                            content: TextFormField(
-                              controller: categoryNameController,
-                              textAlignVertical: TextAlignVertical.center,
-                              decoration: const InputDecoration(
-                                isDense: true,
-                                filled: true,
-                                fillColor: Colors.white,
-                                border: OutlineInputBorder(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(12)),
-                                ),
-                                labelText: 'Name',
-                              ),
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(ctx),
-                                child: const Text('Cancel'),
-                              ),
-                              ElevatedButton(
-                                onPressed: () async {
-                                  final categoryName =
-                                      categoryNameController.text.trim();
-                                  if (categoryName.isEmpty) {
-                                    return;
-                                  }
-
-                                  final newCategory = assert_repo.Category(
-                                    categoryId: const Uuid().v1(),
-                                    name: categoryName,
-                                    totalAssert: 0,
-                                  );
-
-                                  try {
-                                    await _assertRepository
-                                        .createCategory(newCategory);
-                                    if (!mounted) {
-                                      return;
-                                    }
-
-                                    setState(() {
-                                      myCategories.add(newCategory.name);
-                                      categoryController.text = newCategory.name;
-                                    });
-
-                                    Navigator.pop(ctx);
-                                  } catch (error) {
-                                    if (!mounted) {
-                                      return;
-                                    }
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          'Failed to save category: $error',
-                                        ),
-                                      ),
-                                    );
-                                  }
-                                },
-                                child: const Text('Save'),
-                              ),
-                            ],
-                          );
-                        },
-                      );
-                    },
-                    icon: const Icon(
-                      FontAwesomeIcons.plus,
-                      size: 16,
-                      color: Colors.grey,
-                    ),
+                    onPressed: _addCategoryDialog,
+                    icon: const Icon(FontAwesomeIcons.plus, size: 16, color: Colors.grey),
                   ),
-                  border: const OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(12)),
+                  hintText: 'Category',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
                   ),
-                  labelText: 'Category',
                 ),
               ),
-              const SizedBox(height: 16.0),
+
+              const SizedBox(height: 16),
+
               TextFormField(
                 controller: dateController,
                 readOnly: true,
@@ -293,52 +287,41 @@ class _AddAssertState extends State<AddAssert> {
                   );
                   if (newDate != null) {
                     setState(() {
-                      dateController.text =
-                          DateFormat('yyyy-MM-dd').format(newDate);
+                      dateController.text = DateFormat('yyyy-MM-dd').format(newDate);
                       selectDate = newDate;
                     });
                   }
                 },
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   filled: true,
                   fillColor: Colors.white,
+                  prefixIcon: const Icon(FontAwesomeIcons.clock, size: 16, color: Colors.grey),
+                  hintText: 'Date',
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(12)),
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
                   ),
-                  labelText: 'Date',
                 ),
               ),
-              const SizedBox(height: 16.0),
-              Container(
+
+              const SizedBox(height: 24),
+
+              SizedBox(
                 width: double.infinity,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [
-                      Color(0xFF00B2E7),
-                      Color.fromARGB(255, 101, 10, 117),
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: TextButton(
-                  onPressed: _isSaving ? null : _saveAsset,
-                  style: TextButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    minimumSize: const Size.fromHeight(50),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    backgroundColor: Colors.transparent,
-                    shadowColor: Colors.transparent,
-                  ),
-                  child: _isSaving
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Text('Add Asset'),
-                ),
+                height: kToolbarHeight,
+                child: _isSaving
+                    ? const Center(child: CircularProgressIndicator())
+                    : TextButton(
+                        onPressed: _saveAsset,
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.black,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        child: const Text(
+                          'Save',
+                          style: TextStyle(fontSize: 20, color: Colors.white),
+                        ),
+                      ),
               ),
             ],
           ),
