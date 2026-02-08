@@ -19,10 +19,10 @@ class _AddAssertState extends State<AddAssert> {
   DateTime selectDate = DateTime.now();
   bool _isSaving = false;
 
-  // ✅ simple list of category names
+  //  simple list of category names
   List<String> myCategories = [];
 
-  // ✅ change these in ONE place if you want different collection names
+  //  change these in ONE place if you want different collection names
   final _categoriesCol = FirebaseFirestore.instance.collection('assert_categories');
   final _assertsCol = FirebaseFirestore.instance.collection('asserts');
 
@@ -149,7 +149,7 @@ class _AddAssertState extends State<AddAssert> {
 
                   if (!mounted) return;
 
-                  // ✅ update UI immediately (and also set selected)
+                  // update UI immediately (and also set selected)
                   setState(() {
                     myCategories.insert(0, name);
                     categoryController.text = name;
@@ -157,8 +157,7 @@ class _AddAssertState extends State<AddAssert> {
 
                   Navigator.pop(ctx);
 
-                  // ✅ optional: re-fetch to be 100% consistent with Firebase ordering
-                  // await _loadCategories();
+                 
                 } catch (e) {
                   if (!mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
