@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
@@ -22,15 +23,19 @@ class _AddAssertState extends State<AddAssert> {
   //  simple list of category names
   List<String> myCategories = [];
 
+  bool _firebaseReady = false;
+
   //  change these in ONE place if you want different collection names
-  final _categoriesCol = FirebaseFirestore.instance.collection('assert_categories');
-  final _assertsCol = FirebaseFirestore.instance.collection('asserts');
+  CollectionReference<Map<String, dynamic>> get _categoriesCol =>
+      FirebaseFirestore.instance.collection('assert_categories');
+  CollectionReference<Map<String, dynamic>> get _assertsCol =>
+      FirebaseFirestore.instance.collection('asserts');
 
   @override
   void initState() {
     super.initState();
     dateController.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
-    _loadCategories();
+    _initializePage();
   }
 
   @override
@@ -42,6 +47,8 @@ class _AddAssertState extends State<AddAssert> {
   }
 
   Future<void> _loadCategories() async {
+    if (!await _ensureFirebaseReady()) return;
+
     try {
       final snap = await _categoriesCol.orderBy('createdAt', descending: true).get();
 
@@ -187,6 +194,11 @@ class _AddAssertState extends State<AddAssert> {
     setState(() => _isSaving = true);
 
     try {
+      if (!await _ensureFirebaseReady()) {
+        if (mounted) setState(() => _isSaving = false);
+        return;
+      }
+
       final assertId = const Uuid().v1();
 
       await _assertsCol.doc(assertId).set({
@@ -210,6 +222,36 @@ class _AddAssertState extends State<AddAssert> {
       );
     } finally {
       if (mounted) setState(() => _isSaving = false);
+    }
+  }
+
+  Future<void> _initializePage() async {
+    await _ensureFirebaseReady();
+    if (_firebaseReady) {
+      await _loadCategories();
+    }
+  }
+
+  Future<bool> _ensureFirebaseReady() async {
+    if (_firebaseReady) return true;
+
+    try {
+      if (Firebase.apps.isEmpty) {
+        await Firebase.initializeApp();
+      }
+      _firebaseReady = true;
+      return true;
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Firebase is not configured for this platform yet. Error: $e',
+            ),
+          ),
+        );
+      }
+      return false;
     }
   }
 
