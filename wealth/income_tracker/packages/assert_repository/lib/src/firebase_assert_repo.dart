@@ -5,15 +5,14 @@ import '../assert_repository.dart';
 import 'package:assert_repository/src/category.dart'; // Make sure this path points to where Category is defined
 
 class FirebaseAssertRepo implements AssertRepository {
-   final categoryCollection = FirebaseFirestore.instance.collection('categories');
-	 final assertCollection = FirebaseFirestore.instance.collection('asserts');
 
   @override
   Future<void> createCategory(Category category) async {
     try {
-      await categoryCollection
-        .doc(category.categoryId)
-        .set(category.toEntity().toDocument());
+      await FirebaseFirestore.instance
+          .collection('categories')
+          .doc(category.categoryId)
+          .set(category.toEntity().toDocument());
     } catch (e) {
       log(e.toString());
       rethrow;
@@ -23,11 +22,14 @@ class FirebaseAssertRepo implements AssertRepository {
   @override
   Future<List<Category>> getCategory() async {
     try {
-      return await categoryCollection
-        .get()
-        .then((value) => value.docs.map((e) => 
-          Category.fromEntity(CategoryEntity.fromDocument(e.data()))
-        ).toList());
+      return await FirebaseFirestore.instance
+          .collection('categories')
+          .get()
+          .then(
+            (value) => value.docs
+                .map((e) => Category.fromEntity(CategoryEntity.fromDocument(e.data())))
+                .toList(),
+          );
     } catch (e) {
       log(e.toString());
       rethrow;
