@@ -3,6 +3,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:income_tracker/screens/add_assert/blocs/create_categorybloc/create_category_bloc.dart';
+import 'package:income_tracker/screens/add_assert/blocs/get_categories_bloc/get_category_bloc.dart';
+//import 'package:income_tracker/screens/add_assert/blocs/create_assert_bloc/create_assert_bloc.dart';
 import 'package:income_tracker/screens/add_assert/views/add_assert.dart';
 import 'package:income_tracker/screens/home/views/main_screen.dart';
 import 'package:income_tracker/screens/stats/stats.dart';
@@ -70,9 +72,12 @@ class _HomeScreenState extends State<HomeScreen> {
                           create: (context) => CreateCategoryBloc(FirebaseAssertRepo()),
                         ),
               BlocProvider(
-                create: (context) => CreateCategoryBloc(
-                  FirebaseAssertRepo()),
-                ),],
+                          create: (context) => GetCategoriesBloc(FirebaseAssertRepo())..add(GetCategories()),
+                        ),
+                        // BlocProvider(
+                        //   create: (context) => CreateAssertBloc(FirebaseAssertRepo()),
+                        // ),
+                      ],
                 child: const AddAssert(),
               ),
             ),
