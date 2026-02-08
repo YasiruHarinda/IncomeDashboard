@@ -1,20 +1,10 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:uuid/uuid.dart';
-import 'package:assert_repository/assert_repository.dart';
+import 'package:assert_repository/assert_repository.dart' as assert_repo;
 //import 'package:income_tracker/screens/add_assert/blocs/create_categorybloc/create_assert_bloc.dart';
 // import 'package:income_tracker/screens/add_assert/blocs/get_category_bloc/get_categories_bloc.dart';
-import 'package:income_tracker/screens/add_assert/views/category_creation.dart';
-
-// Simple Category class for dialog usage
-class Category {
-  String categoryID;
-  String name;
-
-  Category({required this.categoryID, required this.name});
-}
 
 class AddAssert extends StatefulWidget {
   const AddAssert({super.key});
@@ -24,6 +14,7 @@ class AddAssert extends StatefulWidget {
 }
 
 class _AddAssertState extends State<AddAssert> {
+  final assert_repo.AssertRepository _assertRepository = assert_repo.FirebaseAssertRepo();
   TextEditingController assertController = TextEditingController();
   TextEditingController categoryController = TextEditingController();
   TextEditingController dateController = TextEditingController();
@@ -139,18 +130,34 @@ class _AddAssertState extends State<AddAssert> {
               child: const Text('Cancel'),
             ),
             ElevatedButton(
-              onPressed: () {
-                final category = Category(
-                  categoryID: const Uuid().v1(),
-                  name: categoryNameController.text.trim(),
+              onPressed: () async {
+                final categoryName = categoryNameController.text.trim();
+                if (categoryName.isEmpty) {
+                  return;
+                }
+
+                final category = assert_repo.Category(
+                  categoryId: const Uuid().v1(),
+                  name: categoryName,
+                  totalAssert: 0,
                 );
 
-                setState(() {
-                  myCategories.add(category.name);           // add to list
-                  categoryController.text = category.name;    // set Category field text
-                });
+                try {
+                  await _assertRepository.createCategory(category);
+                  if (!mounted) return;
 
-                Navigator.pop(ctx);
+                  setState(() {
+                    myCategories.add(category.name);
+                    categoryController.text = category.name;
+                  });
+
+                  Navigator.pop(ctx);
+                } catch (error) {
+                  if (!mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Failed to save category: $error')),
+                  );
+                }
               },
               child: const Text('Save'),
             ),
