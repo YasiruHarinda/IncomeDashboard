@@ -64,10 +64,15 @@ class _HomeScreenState extends State<HomeScreen> {
           Navigator.push(
             context,
             MaterialPageRoute<void>(
-              builder: (BuildContext context) => BlocProvider(
+              builder: (BuildContext context) => MultiBlocProvider(
+                      providers: [
+                        BlocProvider(
+                          create: (context) => CreateCategoryBloc(FirebaseAssertRepo()),
+                        ),
+              BlocProvider(
                 create: (context) => CreateCategoryBloc(
-                  FirebaseAssertRepo()
-                ),
+                  FirebaseAssertRepo()),
+                ),],
                 child: const AddAssert(),
               ),
             ),
