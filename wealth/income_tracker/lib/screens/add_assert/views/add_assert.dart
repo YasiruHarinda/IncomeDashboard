@@ -123,7 +123,7 @@ class _AddAssertState extends State<AddAssert> {
                 if (name.isEmpty) return;
 
                 try {
-                  // ✅ prevent duplicates (case-insensitive)
+                  //  prevent duplicates (case-insensitive)
                   final existing = await _categoriesCol
                       .where('nameLower', isEqualTo: name.toLowerCase())
                       .limit(1)
