@@ -1,17 +1,16 @@
-part of 'create_expense_bloc.dart';
+part of 'create_category_bloc.dart';
 
-sealed class CreateExpenseEvent extends Equatable {
-  const CreateExpenseEvent();
+abstract class CreateCategoryEvent extends Equatable {
+  const CreateCategoryEvent();
 
-  @override
   List<Object> get props => [];
 }
 
-class CreateExpense extends CreateExpenseEvent{
-  final Expense expense;
+class CreateCategory extends CreateCategoryEvent {
+  final Category category;
 
-  const CreateExpense(this.expense);
+  const CreateCategory(this.category);
 
   @override
-  List<Object> get props => [expense];
+  List<Object> get props => [category];
 }

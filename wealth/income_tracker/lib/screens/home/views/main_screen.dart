@@ -86,7 +86,7 @@ class MainScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
                 const Text(
-                  'Rs 4800.00',
+                  'Rs 500000.00',
                   style: TextStyle(
                     fontSize: 40,
                     color: Colors.white,
@@ -99,9 +99,9 @@ class MainScreen extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: const [
-                      MiniStat(title: 'Cash', value: 'Rs 2500'),
-                      MiniStat(title: 'Investments', value: 'Rs 25M'),
-                      MiniStat(title: 'Liabilities', value: 'Rs 800'),
+                      MiniStat(title: 'Cash', value: 'Rs 25000'),
+                      MiniStat(title: 'Investments', value: 'Rs 475000'),
+                      MiniStat(title: 'Liabilities', value: 'Rs 0'),
                     ],
                   ),
                 ),

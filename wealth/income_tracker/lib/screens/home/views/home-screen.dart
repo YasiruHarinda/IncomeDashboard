@@ -1,5 +1,10 @@
+import 'package:assert_repository/assert_repository.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:income_tracker/screens/add_assert/blocs/create_categorybloc/create_category_bloc.dart';
+import 'package:income_tracker/screens/add_assert/blocs/get_categories_bloc/get_category_bloc.dart';
+//import 'package:income_tracker/screens/add_assert/blocs/create_assert_bloc/create_assert_bloc.dart';
 import 'package:income_tracker/screens/add_assert/views/add_assert.dart';
 import 'package:income_tracker/screens/home/views/main_screen.dart';
 import 'package:income_tracker/screens/stats/stats.dart';
@@ -17,18 +22,19 @@ class _HomeScreenState extends State<HomeScreen> {
   final Color selectedItem = const Color(0xFF00B2E7);
   final Color unselectedItem = Colors.black;
 
+  static const List<Widget> _pages = <Widget>[MainScreen(), StatScreen()];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      body: _pages[index],
+
       bottomNavigationBar: ClipRRect(
         borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
         child: BottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
           currentIndex: index,
-          onTap: (value) {
-            setState(() {
-              index = value;
-            });
-          },
+          onTap: (value) => setState(() => index = value),
           showSelectedLabels: false,
           showUnselectedLabels: false,
           elevation: 3,
@@ -50,36 +56,47 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
+
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        highlightElevation: 0,
         onPressed: () {
-          // TODO: Uncomment and fix import when AddAssert is implemented
-          // Navigator.push(
-          //   context,
-          //   MaterialPageRoute<void>(
-          //     builder:(BuildContext context) =>const AddAssert(),
-          //   )
-          // );
+          Navigator.push(
+            context,
+            MaterialPageRoute<void>(
+              builder: (BuildContext context) => MultiBlocProvider(
+                      providers: [
+                        BlocProvider(
+                          create: (context) => CreateCategoryBloc(FirebaseAssertRepo()),
+                        ),
+              BlocProvider(
+                          create: (context) => GetCategoriesBloc(FirebaseAssertRepo())..add(GetCategories()),
+                        ),
+                        // BlocProvider(
+                        //   create: (context) => CreateAssertBloc(FirebaseAssertRepo()),
+                        // ),
+                      ],
+                child: const AddAssert(),
+              ),
+            ),
+          );
         },
-        shape: const CircleBorder(),
         child: Container(
           width: 60,
           height: 60,
           decoration: const BoxDecoration(
             shape: BoxShape.circle,
             gradient: LinearGradient(
-              colors: [
-                Color(0xFF00B2E7),
-                Color.fromARGB(255, 101, 10, 117),
-              ],
+              colors: [Color(0xFF00B2E7), Color.fromARGB(255, 101, 10, 117)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
           ),
-          child: const Icon(CupertinoIcons.add),
+          child: const Icon(CupertinoIcons.add, color: Colors.white),
         ),
       ),
-      body: index == 0 ? const MainScreen() : const StatScreen(),
     );
   }
 }

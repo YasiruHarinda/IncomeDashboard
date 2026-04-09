@@ -1,13 +1,22 @@
 import 'package:bloc/bloc.dart';
-import 'package:meta/meta.dart';
+import 'package:equatable/equatable.dart';
+import 'package:assert_repository/assert_repository.dart';
 
 part 'create_category_event.dart';
 part 'create_category_state.dart';
 
 class CreateCategoryBloc extends Bloc<CreateCategoryEvent, CreateCategoryState> {
-  CreateCategoryBloc() : super(CreateCategoryInitial()) {
-    on<CreateCategoryEvent>((event, emit) {
-      // TODO: implement event handler
+  final AssertRepository assertRepository;
+
+  CreateCategoryBloc(this.assertRepository) : super(CreateCategoryInitial()) {
+    on<CreateCategory>((event, emit) async {
+      emit(CreateCategoryLoading());
+      try {
+        await assertRepository.createCategory(event.category);
+        emit(CreateCategorySuccess());
+      } catch (e) {
+        emit(CreateCategoryFailure());
+      }
     });
   }
 }
